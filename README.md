@@ -1,224 +1,159 @@
+# Final Project: Full Web Application Deployment on AWS (EC2, RDS, S3)
 
-# Full Web Application Deployment on AWS (EC2, RDS, S3)
+## 📌 Project Overview
 
-## Overview
+This project is a full-stack web application deployed on Amazon Web Services. It uses:
 
-This project involves building and deploying a full web application using Amazon Web Services (AWS). The application integrates multiple AWS services, including EC2 for compute, RDS for database management, and S3 for static file hosting.
-
-### Project Components:
-
-1. **EC2 (Elastic Compute Cloud)**: Hosts the backend application (Flask) that interacts with the database.
-2. **RDS (Relational Database Service)**: PostgreSQL database to store and manage data.
-3. **S3 (Simple Storage Service)**: Hosts the static files (HTML, CSS, JS) of the front-end web application.
-
-### Application Features:
-
-* Simple web application allowing users to **add** and **delete** records in the database.
-* The static files are served via an S3 bucket.
-* The backend is powered by a Flask app, which communicates with a PostgreSQL database hosted on Amazon RDS.
+* **Amazon EC2**: to host the backend application
+* **Amazon RDS (PostgreSQL)**: to manage and store data
+* **Amazon S3**: to host static frontend files
 
 ---
 
-## Prerequisites
+## 🧱 Components
 
-Before starting, ensure you have the following:
+### 1. PostgreSQL Database (RDS)
 
-1. **AWS Account**: You should have an active AWS account with access to EC2, RDS, and S3 services.
-2. **Kaggle Dataset**: Download the dataset of your choice in CSV format from Kaggle.
+* **Dataset Source**: Downloaded from [Kaggle](https://www.kaggle.com/datasets)
+* **Database name**: `db_javlonbek`
+* **Table name**: `movies`
+* **Imported Using**: `psql` / `DBeaver`
+* The table structure matches the CSV schema from Kaggle
 
-   * Example: Movies dataset - `movies.csv`
-3. **AWS CLI**: Ensure that the AWS CLI is installed and configured on your local machine for easy management of AWS resources.
+### 2. Static Frontend (S3)
 
----
+* **S3 bucket**: Publicly accessible, configured for static website hosting
+* **Main HTML file**: `index_javlonbek.html.html`
+* Contains **Add** and **Delete** buttons
+* Communicates with the backend via HTTP
 
-## Project Setup
+### 3. Backend Server (EC2)
 
-### 1. **Database Setup (RDS - PostgreSQL)**
-
-#### Step 1: Create an RDS PostgreSQL instance
-
-1. Go to the **AWS RDS Console** and launch a new PostgreSQL database instance.
-2. Choose **PostgreSQL** as the database engine and follow the wizard to configure the instance.
-3. Create a new database named `db_javlonbek` (replace `javlonbek` with your first name).
-4. Note the **RDS endpoint** (e.g., `javlon2t11.ct6ei6agkus4.ap-south-1.rds.amazonaws.com`), **username**, and **password**.
-
-#### Step 2: Import CSV Data into PostgreSQL
-
-1. Use tools like **DBeaver** or **psql** to import the downloaded CSV data into the PostgreSQL database.
-2. Create a table with the name format `tbl_javlonbek_movies` (replace `javlonbek` with your first name).
-3. Ensure the table schema matches the CSV file structure (columns such as `id`, `title`, `genre`, etc.).
+* Hosted on **Ubuntu EC2 instance**
+* Built using **Flask (Python)**
+* Communicates with **RDS PostgreSQL**
+* Listens to HTTP requests to **Add/Delete** data from the database
 
 ---
 
-### 2. **S3 Static Hosting Setup**
+## 🚀 Deployment Instructions
 
-#### Step 1: Create an S3 Bucket
+### 1. Clone the Repository
 
-1. Go to the **S3 Console** and create a new bucket.
-2. Enable **static website hosting** in the bucket settings.
-3. Upload your HTML, CSS, and JS files to the S3 bucket.
+```bash
+git clone https://github.com/JavlonbekGoziev/javlon2t11.git
+cd movies
+```
 
-   * The main HTML file should be named: `index_javlonbek.html` (replace `javlonbek` with your first name).
+### 2. Setup Virtual Environment
 
-#### Step 2: Set Permissions
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-1. Set the bucket policy to make the website publicly accessible.
-2. Example bucket policy for public access:
+### 3. Configure `app.py`
 
-   ```json
-   {
-     "Version": "2012-10-17",
-     "Statement": [
-       {
-         "Sid": "PublicReadGetObject",
-         "Effect": "Allow",
-         "Action": "s3:GetObject",
-         "Resource": "arn:aws:s3:::javlon2t11/*"
-       }
-     ]
-   }
-   ```
+Update DB credentials:
 
-#### Step 3: Test Static Website
+```python
+host = "javlon2t.ct6ei6agkus4.ap-south-1.rds.amazonaws.com"
+database = "db_javlonbek"
+user = "postgres"
+password = "postgres"
+```
 
-* Access the website via the provided S3 bucket URL (e.g., `http://<javlon2t11.s3-website-ap-south-1.amazonaws.com`).
+### 4. Run Backend on EC2
 
----
+```bash
+python app.py
+```
 
-### 3. **EC2 Deployment**
+Accessible at: `http://13.201.90.1:5000`
 
-#### Step 1: Launch EC2 Instance
+### 5. Upload Static Files to S3
 
-1. Go to the **EC2 Console** and launch a new **Ubuntu EC2 instance**.
-2. Attach the **javlon2t11.pem** private key to access the EC2 instance via SSH.
-3. Configure security groups to allow inbound traffic on port 80 (HTTP) and port 5000 (if using Flask's default port).
+* Upload `index_javlonbek.html.html`, `styles.css`, and JS files
+* Set bucket to public
+* Enable **Static Website Hosting**
 
-#### Step 2: SSH Access to EC2
+Accessible at:
+`[http://<your-bucket-name>.s3-website-<region>.amazonaws.com](http://javlonbek-bucket.s3-website-us-east-1.amazonaws.com
+)`
 
-1. SSH into the EC2 instance using the following command:
 
-   ```bash
-   ssh -i "javlon2t11.pem" ubuntu@javlon2t11.ct6ei6agkus4.ap-south-1.compute.amazonaws.com
-   ```
+## 🧪 Features
 
-#### Step 3: Install Dependencies
-
-1. Update packages and install necessary dependencies:
-
-   ```bash
-   sudo apt update
-   sudo apt install python3-pip python3-dev libpq-dev git
-   sudo pip3 install flask psycopg2
-   ```
-
-#### Step 4: Set Up Flask Backend Application
-
-1. Clone the GitHub repository into the EC2 instance:
-
-   ```bash
-   git clone https://github.com/JavlonbekGoziyev/javlon2t11.git
-   cd javlon2t11
-   ```
-
-2. Configure the **Flask application** (`app.py`) to connect to your RDS PostgreSQL database:
-
-   ```python
-   conn = psycopg2.connect(
-       host="javlon2t11.ct6ei6agkus4.ap-south-1.rds.amazonaws.com",
-       database="db_javlonbek",
-       user="postgres",
-       password="postgres"
-   )
-   ```
-
-3. Run the Flask application:
-
-   ```bash
-   python3 app.py
-   ```
-
-   The app should now be running on the EC2 instance, accessible via `http://<MY-IP, secret>:5000`.
+* ✅ Static homepage hosted on **S3**
+* ✅ Connects to **RDS PostgreSQL**
+* ✅ **Add/Delete** buttons modify DB content
+* ✅ Data is stored permanently in RDS
+* ✅ Accessible from public IP or S3 URL
 
 ---
 
-### 4. **Frontend (HTML, CSS, JS)**
+## 📁 Project Structure
 
-#### Step 1: Design the Frontend
-
-1. Create a simple frontend with **Add** and **Delete** buttons.
-2. The buttons should interact with the backend (Flask) to add and delete data in the PostgreSQL database.
-
-#### Step 2: Upload to S3
-
-1. Upload the static files (HTML, CSS, JS) to the S3 bucket you created earlier.
-
----
-
-## How to Run the Application
-
-### Local Setup:
-
-1. Clone the repository to your local machine:
-
-   ```bash
-   git clone https://github.com/JavlonbekGoziyev/javlon2t11.git
-   cd javlon2t11
-   ```
-
-2. Install Python dependencies:
-
-   ```bash
-   pip install flask psycopg2
-   ```
-
-3. Run the Flask app:
-
-   ```bash
-   python app.py
-   ```
-
-4. Open the browser and navigate to `http://localhost:5000`.
-
-### AWS Setup:
-
-1. Access the EC2 instance using SSH.
-2. Run the Flask app on the EC2 instance (`python3 app.py`).
-3. Open the web application in a browser via `http://<EC2-MY, IP,>:5000`.
+```
+Movies/
+├── app.py
+├── requirements.txt
+├── import_data.py
+├── templates/
+│   └── index_javlonbek.html.html
+├── static/
+│   ├── styles.css
+│   └── script.js
+└── README.md
+```
 
 ---
 
-## Deployment Details
+## 🧪 Defense Tasks (Sample)
 
-* **EC2 Instance:** The backend application is deployed on an EC2 Ubuntu instance.
-* **RDS Database:** PostgreSQL database is hosted on Amazon RDS and connected to the Flask application.
-* **S3 Bucket:** Static files (HTML, CSS, JS) are hosted on S3 and served as the frontend.
+You will be asked to:
 
----
+1. Rename the table
+2. Change the DB name
+3. Drop a table
+4. Remove a column
+5. Update the app to reflect changes
 
-## Links to Deployed Resources
-
-* **S3 Bucket for Static Hosting**: [Link to S3 static website](http://javlon2t11.s3-website-ap-south-1.amazonaws.com)
-* **EC2 Application**: [Link to EC2 web app](http://<EC2-IP>:5000)
-* **RDS Database**: (Only accessible from EC2 instance)
+You must show your app continues to work after each task.
 
 ---
 
-## Tasks to Modify the Web Application
+## 🔗 Deployed Links
 
-### 1. Change the Name of the Table in the Database.
-
-### 2. Change the Database Name in the RDS Instance.
-
-### 3. Drop a Table from the Database.
-
-### 4. Remove a Column from a Table.
-
-### 5. Update the Web Application to Reflect These Changes.
-
-These tasks will require you to update the database schema and modify the web application to accommodate the changes.
+* **Frontend (S3)**: [Click here](http://javlonbek-bucket.s3-website-us-east-1.amazonaws.com)
+* **Backend (EC2 IP)**: `http://13.201.90.1:5000`
+* **Database (RDS)**: Connected privately — shown during defense
 
 ---
 
-## Conclusion
+## ✅ Completion Criteria
 
-This project demonstrates how to build and deploy a full web application using AWS services like EC2, RDS, and S3. The application allows adding and deleting data from a PostgreSQL database, with static content served via S3 and the backend hosted on EC2.
+| Requirement                          | Status |
+| ------------------------------------ | ------ |
+| S3 Static Hosting                    | ✅      |
+| PostgreSQL RDS Connection            | ✅      |
+| EC2 Backend Deployment               | ✅      |
+| Add/Delete Buttons Functioning       | ✅      |
+| Code and Instructions in GitHub Repo | ✅      |
+
+---
+
+## 🧠 Notes
+
+* Use your **first name** in all naming (e.g., `db_javlonbek`, `index_javlonbek.html.html`, etc.)
+* Public access and proper security groups are configured
+* RDS instance must allow EC2 connection
+
+---
+
+## 📬 Contact
+
+Project by **Javlonbek**
+Feel free to reach out via GitHub for any questions or improvements.
+
