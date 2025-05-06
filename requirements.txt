@@ -1,0 +1,4 @@
+
+Flask==2.2.3
+psycopg2-binary==2.9.6
+Flask-CORS==3.1.1
